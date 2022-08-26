@@ -3,7 +3,7 @@ import pandas as pd
 import json
 
 # this token expires with some requests and an hour or two
-token = 'BQAsHLFu3ohdxmj4HNnhiOTbZuH_0jb7XVezyP5K8KV8AANwSTP04xiRUVcXXCPFHrI7t_OZwLGiNY9zwdhrqn1dXbozzmtJs9PAC2Mv5MCB3Gp3WYGm9LDHLSUjKYm5f7xHp0onJUSsSf3l8L2IGqMTmZ9soaOWCY3rKcPpFg'
+token = 'BQCmrfhqNkMyiTLVXeWXQf0XteTmdLtqTiC_p8zD5j1AS9hPxVgdRrlcpd5oqjrDMFKL0PWgY-HX-zmMlVj-nt1UYVrftVXjbmZxHRpDXJ0K1tQis8qqSUCwkhAD0J-piFXpeXTHgDJA-Dp2NwjQqC6XDHoiq1CB2kBUtz3F4w'
 auth = "Bearer {}".format(token)
 header = {"Accept":"application/json", "Content-Type": "application/json",
     "Authorization":auth}
@@ -14,11 +14,13 @@ response = requests.get("https://api.spotify.com/v1/playlists/37i9dQZEVXbMDoHDwV
 '''with open('response.json','w') as f:
     f.write(response.text)'''
 
+# only execute if the request was successful
 if response.status_code == 200:
     dic = json.loads(response.text)
     items = dic['tracks']['items']
     track_names = [item['track']['name'] for item in items]
     artists = [[artist['name'] for artist in item['track']['artists']] for item in items]
+    artists = [','.join(artist) for artist in artists]
     df = pd.DataFrame({'track': track_names, 'artist': artists})
     # try small query
     for artist in df['artist']:
@@ -33,5 +35,8 @@ if response.status_code == 200:
     for artist in df2['artist']:
         if 'Bad Bunny' in artist:
             print(artist)
+    print(df.head())
+    print(df2.head())
+# if something goes wrong, print the status code
 else:
-    print(response)
+    print(response.status_code)
