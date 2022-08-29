@@ -1,13 +1,37 @@
-import requests
+import requests, base64
 import pandas as pd
 import json
+import configparser
 
-# this token expires with some requests and an hour or two
-token = 'BQCmrfhqNkMyiTLVXeWXQf0XteTmdLtqTiC_p8zD5j1AS9hPxVgdRrlcpd5oqjrDMFKL0PWgY-HX-zmMlVj-nt1UYVrftVXjbmZxHRpDXJ0K1tQis8qqSUCwkhAD0J-piFXpeXTHgDJA-Dp2NwjQqC6XDHoiq1CB2kBUtz3F4w'
-auth = "Bearer {}".format(token)
-header = {"Accept":"application/json", "Content-Type": "application/json",
-    "Authorization":auth}
-response = requests.get("https://api.spotify.com/v1/playlists/37i9dQZEVXbMDoHDwVN2tF", headers=header)
+def getToken(client_id, client_secret):
+    auth = '{}:{}'.format(client_id, client_secret)
+    b64auth = base64.b64encode(auth.encode()).decode()
+    header = {"Authorization": "Basic %s" % b64auth,
+              "Content-Type": "application/x-www-form-urlencoded"}
+    data = {"grant_type": "client_credentials"}
+    return requests.post("https://accounts.spotify.com/api/token", headers=header, data=data)
+
+def getPlaylist(token):
+    auth = "Bearer {}".format(token)
+    header = {"Accept":"application/json", "Content-Type": "application/json",
+        "Authorization":auth}
+    return requests.get("https://api.spotify.com/v1/playlists/37i9dQZEVXbMDoHDwVN2tF", headers=header)
+
+parser = configparser.ConfigParser()
+parser.read("billboardify.conf")
+client_id = parser.get("spotify_credentials", "client_id")
+client_secret = parser.get("spotify_credentials", "client_secret")
+
+token = getToken(client_id, client_secret)
+if token.status_code != 200:
+    print("Status code:", token.status_code)
+    print("Response:", token.json())
+    exit()
+
+token = token.json()
+token = token['access_token']
+
+response = getPlaylist(token)
 
 # sanity check
 # write this to have a look at the responses json
@@ -23,20 +47,10 @@ if response.status_code == 200:
     artists = [','.join(artist) for artist in artists]
     df = pd.DataFrame({'track': track_names, 'artist': artists})
     # try small query
-    for artist in df['artist']:
-        if 'Bad Bunny' in artist:
-            print(artist)
+    # for artist in df['artist']:
+    #     if 'Bad Bunny' in artist:
+    #         print(artist)
     df.to_csv("top50Global.csv", index=False)
-    #print(df)
-    # create new df reading from the first file
-    df2 = pd.read_csv("top50Global.csv")
-    print("")
-    # compare new df's output
-    for artist in df2['artist']:
-        if 'Bad Bunny' in artist:
-            print(artist)
-    print(df.head())
-    print(df2.head())
 # if something goes wrong, print the status code
 else:
     print(response.status_code)
