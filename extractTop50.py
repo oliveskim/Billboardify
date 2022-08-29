@@ -2,6 +2,7 @@ import requests, base64
 import pandas as pd
 import json
 import configparser
+from dateutil.parser import parse
 
 def getToken(client_id, client_secret):
     auth = '{}:{}'.format(client_id, client_secret)
@@ -33,19 +34,23 @@ token = token['access_token']
 
 response = getPlaylist(token)
 
-# sanity check
-# write this to have a look at the responses json
-'''with open('response.json','w') as f:
-    f.write(response.text)'''
+# uncomment this to have a look at the responses json
+# with open('response.json','w') as f:
+#     f.write(response.text)
 
 # only execute if the request was successful
 if response.status_code == 200:
     dic = json.loads(response.text)
     items = dic['tracks']['items']
+    date_added = [parse(item['added_at']) for item in items]
+    date_added = [date.date() for date in date_added]
+
     track_names = [item['track']['name'] for item in items]
+
     artists = [[artist['name'] for artist in item['track']['artists']] for item in items]
     artists = [','.join(artist) for artist in artists]
-    df = pd.DataFrame({'track': track_names, 'artist': artists})
+
+    df = pd.DataFrame({'date_added': date_added, 'track': track_names, 'artist': artists})
     # try small query
     # for artist in df['artist']:
     #     if 'Bad Bunny' in artist:
