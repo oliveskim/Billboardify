@@ -35,8 +35,8 @@ token = token['access_token']
 response = getPlaylist(token)
 
 # uncomment this to have a look at the responses json
-with open('response.json','w') as f:
-    f.write(response.text)
+# with open('response.json','w') as f:
+#     f.write(response.text)
 
 # if something goes wrong, exit with status code
 if response.status_code != 200:
@@ -47,7 +47,7 @@ if response.status_code != 200:
 dic = json.loads(response.text)
 items = dic['tracks']['items']
 date_added = [parse(item['added_at']) for item in items]
-date_added = [date.date() for date in date_added]
+# date_added = [date.date() for date in date_added]
 
 track_names = [item['track']['name'] for item in items]
 
