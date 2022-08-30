@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import configparser
 from dateutil.parser import parse
+from os.path import exists
 
 def getToken(client_id, client_secret):
     auth = '{}:{}'.format(client_id, client_secret)
@@ -55,4 +56,7 @@ artists = [[artist['name'] for artist in item['track']['artists']] for item in i
 artists = [','.join(artist) for artist in artists]
 
 df = pd.DataFrame({'date_added': date_added, 'track': track_names, 'artist': artists})
-df.to_csv("top50Global.csv", mode='a', index=False)
+if exists("top50Global.csv"):
+    df.to_csv("top50Global.csv", mode='a', header=False, index=False)
+else:
+    df.to_csv("top50Global.csv", index=False)
