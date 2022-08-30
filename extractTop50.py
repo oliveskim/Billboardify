@@ -2,6 +2,7 @@ import requests, base64
 import pandas as pd
 import json
 import configparser
+from datetime import date
 from dateutil.parser import parse
 from os.path import exists
 
@@ -35,9 +36,9 @@ token = token['access_token']
 
 response = getPlaylist(token)
 
-# uncomment this to have a look at the responses json
-# with open('response.json','w') as f:
-#     f.write(response.text)
+raw_data = './data/raw/top50/{}.json'.format(date.today())
+with open(raw_data,'w') as f:
+    f.write(response.text)
 
 # if something goes wrong, exit with status code
 if response.status_code != 200:
@@ -56,7 +57,8 @@ artists = [[artist['name'] for artist in item['track']['artists']] for item in i
 artists = [','.join(artist) for artist in artists]
 
 df = pd.DataFrame({'date_added': date_added, 'track': track_names, 'artist': artists})
-if exists("top50Global.csv"):
-    df.to_csv("top50Global.csv", mode='a', header=False, index=False)
+file_path = './data/structured/top50Global.csv'
+if exists(file_path):
+    df.to_csv(file_path, mode='a', header=False, index=False)
 else:
-    df.to_csv("top50Global.csv", index=False)
+    df.to_csv(file_path, index=False)

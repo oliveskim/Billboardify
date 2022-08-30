@@ -7,12 +7,15 @@ def countGlobal(artist):
             count += 1
     return count
 
-with open("billboard_10s.csv") as f:
+billboard_path = './data/structured/billboard_10s.csv'
+with open(billboard_path) as f:
     artists = f.readlines()
     hot100 = [line.rstrip() for line in artists]
 
-top50 = pd.read_csv("top50Global.csv")
+top50_path = './data/structured/top50Global.csv'
+top50 = pd.read_csv(top50_path)
 
 artist_count = [countGlobal(artist) for artist in hot100]
 result = pd.DataFrame({"artist":hot100, "count":artist_count})
-result.to_csv("result.csv", index=False)
+result_path = './data/structured/artists_count.csv'
+result.to_csv(result_path, index=False)
