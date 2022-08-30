@@ -35,27 +35,24 @@ token = token['access_token']
 response = getPlaylist(token)
 
 # uncomment this to have a look at the responses json
-# with open('response.json','w') as f:
-#     f.write(response.text)
+with open('response.json','w') as f:
+    f.write(response.text)
 
-# only execute if the request was successful
-if response.status_code == 200:
-    dic = json.loads(response.text)
-    items = dic['tracks']['items']
-    date_added = [parse(item['added_at']) for item in items]
-    date_added = [date.date() for date in date_added]
+# if something goes wrong, exit with status code
+if response.status_code != 200:
+    print("Status code:",response.status_code)
+    print("Response:", response.json())
+    exit()
 
-    track_names = [item['track']['name'] for item in items]
+dic = json.loads(response.text)
+items = dic['tracks']['items']
+date_added = [parse(item['added_at']) for item in items]
+date_added = [date.date() for date in date_added]
 
-    artists = [[artist['name'] for artist in item['track']['artists']] for item in items]
-    artists = [','.join(artist) for artist in artists]
+track_names = [item['track']['name'] for item in items]
 
-    df = pd.DataFrame({'date_added': date_added, 'track': track_names, 'artist': artists})
-    # try small query
-    # for artist in df['artist']:
-    #     if 'Bad Bunny' in artist:
-    #         print(artist)
-    df.to_csv("top50Global.csv", index=False)
-# if something goes wrong, print the status code
-else:
-    print(response.status_code)
+artists = [[artist['name'] for artist in item['track']['artists']] for item in items]
+artists = [','.join(artist) for artist in artists]
+
+df = pd.DataFrame({'date_added': date_added, 'track': track_names, 'artist': artists})
+df.to_csv("top50Global.csv", mode='a', index=False)
