@@ -48,7 +48,7 @@ if response.status_code != 200:
 
 dic = json.loads(response.text)
 items = dic['tracks']['items']
-date_added = [parse(item['added_at']) for item in items]
+date_added = [parse(item['added_at']).date() for item in items]
 # date_added = [date.date() for date in date_added]
 
 track_names = [item['track']['name'] for item in items]

@@ -23,24 +23,39 @@ chart_10s = billboard.ChartData(chart_name)
 
 df_chart_10s = tuple_to_df(chart_10s)
 
-print(df_chart_10s.head(10))
-
 path_arquivo_cru = './data/raw/billboard_10s_cru.csv'
 
 with open(path_arquivo_cru, 'w'):
     df_chart_10s.to_csv(path_arquivo_cru, index=False)
 
+#Transformation part: Separating artists in a list
+
 df_chart_replaced = df_chart_10s
 
-test = []
+artists_list = []
 for i in df_chart_replaced['Artists']:   
-    test.append(i.replace(' & ',', ').replace(' Featuring ',', ').replace(' + ', ', '))
+    artists_list.append(i.replace(' & ',', ').replace(' Featuring ',', ').replace(' + ', ', '))
 
-df_chart_replaced['Artists'] = test
-
-print(df_chart_replaced.head(10))
+df_chart_replaced['Artists'] = artists_list
 
 path_arquivo = './data/structured/billboard_10s.csv'
 
 with open(path_arquivo, 'w'):
     df_chart_replaced.to_csv(path_arquivo, index=False)
+
+#Transformations part: distinct artists
+
+distinct_artists_list = []
+
+for i in df_chart_replaced['Artists']:
+    j = i.split(', ')
+    for n in range(len(j)):
+        if j[n] not in distinct_artists_list:
+            distinct_artists_list.append(j[n])
+
+distinct_artists_df = pd.DataFrame(distinct_artists_list, columns= ['Artists'], index=range(1, 101))
+
+path_arquivo_distintos = './data/structured/distinct_artists_billboard_10s.csv'
+
+with open(path_arquivo_distintos, 'w'):
+    distinct_artists_df.to_csv(path_arquivo, index=False)

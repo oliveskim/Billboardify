@@ -7,7 +7,7 @@ def countGlobal(artist):
             count += 1
     return count
 
-billboard_path = './data/structured/billboard_10s.csv'
+billboard_path = './data/structured/distinct_artists_billboard_10s.csv'
 with open(billboard_path) as f:
     artists = f.readlines()
     hot100 = [line.rstrip() for line in artists]
