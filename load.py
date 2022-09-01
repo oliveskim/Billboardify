@@ -1,6 +1,4 @@
-from distutils.command.config import config
-import boto3 
-import awswrangler as wr
+import boto3
 import configparser 
 
 bucket='billboardify'
